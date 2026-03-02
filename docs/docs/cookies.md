@@ -564,4 +564,4 @@ Endpoint POST para auth/login. Retorna dados mockados baseados no arquivo JSON.
 
 ---
 
-**Próximo:** Explore [Exemplos Práticos](./examples) com casos de uso reais! 🚀 
+**Próximo:** Explore [Status Code e Rotas Literais](./status-code-e-rotas-literais) ou [Exemplos Práticos](./examples)! 🚀 

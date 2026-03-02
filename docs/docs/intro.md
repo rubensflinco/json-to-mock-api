@@ -17,7 +17,8 @@ Uma biblioteca CLI simples e poderosa para criar servidores REST a partir de arq
 - 🚀 **Múltiplos Métodos HTTP**: Suporte a GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
 - 📁 **Modo Pasta ou Arquivo**: Carregamento de múltiplos arquivos JSON ou arquivo único
 - 🌐 **CORS Habilitado**: Pronto para uso em aplicações web
-- 🔗 **Parâmetros de Path**: Suporte automático a parâmetros como `:id`, `:userId`, etc.
+- 🔗 **Parâmetros de Path**: Suporte automático a parâmetros como `:id`, `:userId`, e rotas literais com `::param`
+- 📊 **Status Code configurável**: Defina códigos HTTP por endpoint (200, 201, 404, etc.)
 - 🏷️ **Agrupamento Inteligente**: Endpoints agrupados por pasta ou arquivo de origem
 
 ## 🎯 Por que usar o Json-To-Mock-Api?
@@ -84,6 +85,7 @@ npx json-to-mock-api -f db.json
 - [**Guia de Uso**](./usage): Como usar todas as funcionalidades
 - [**Headers Mockados**](./headers): Simule headers de resposta
 - [**Cookies Mockados**](./cookies): Configure cookies de resposta
+- [**Status Code e Rotas Literais**](./status-code-e-rotas-literais): Código HTTP e rotas literais (`::param`)
 - [**Exemplos**](./examples): Exemplos práticos e casos de uso
 
 ## 🤝 Contribuindo

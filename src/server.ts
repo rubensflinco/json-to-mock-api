@@ -11,6 +11,7 @@ const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.me
 interface EndpointConfig {
   [method: string]: {
     body: any;
+    status?: number; // Status HTTP da resposta (ex: 200, 201, 404, 500)
     headers?: Record<string, string>; // Novo campo para headers mockados
     cookies?: Record<string, string | { value: string; options?: any }>; // Novo campo para cookies mockados
   };
@@ -74,6 +75,33 @@ function generateInlineSchema(data: any): any {
   }
 }
 
+/**
+ * Converte o path do endpoint para o formato do Express.
+ * Sequências "::param" são tratadas como literal ":param" (não dinâmico), escapando o ":" para o Express.
+ */
+function toExpressPath(endpointPath: string): string {
+  return endpointPath.replace(/::([a-zA-Z_][a-zA-Z0-9_]*)/g, '\\:$1');
+}
+
+/**
+ * Path para documentação Swagger: parâmetros dinâmicos viram {param}, literais ::param viram :param.
+ */
+function toSwaggerPath(endpointPath: string): string {
+  return endpointPath
+    .replace(/::([a-zA-Z_][a-zA-Z0-9_]*)/g, '__LITERAL__:$1')
+    .replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, '{$1}')
+    .replace(/__LITERAL__\{([^}]+)\}/g, ':$1');
+}
+
+/**
+ * Retorna os nomes dos parâmetros dinâmicos do path (exclui ::param que são literais).
+ */
+function getDynamicPathParams(endpointPath: string): string[] {
+  const paramMatches = endpointPath.match(/(?<!:):([a-zA-Z_][a-zA-Z0-9_]*)/g);
+  if (!paramMatches) return [];
+  return paramMatches.map((m) => m.substring(1));
+}
+
 // Função para gerar documentação Swagger automaticamente
 function generateSwaggerDocumentation(endpointsInfo: Record<string, EndpointInfo>, host: string, port: number): any {
   const paths: any = {};
@@ -82,15 +110,13 @@ function generateSwaggerDocumentation(endpointsInfo: Record<string, EndpointInfo
     const { config: methods, source } = info;
     const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     
-    // Converter parâmetros do Express (:id) para formato OpenAPI ({id})
-    const swaggerPath = path.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, '{$1}');
+    // Converter parâmetros do Express (:id) para formato OpenAPI ({id}); ::param permanece literal
+    const swaggerPath = toSwaggerPath(path);
     
-    // Detectar parâmetros de path
+    // Detectar parâmetros de path (apenas dinâmicos; ::param é literal e não é parâmetro)
     const pathParams = [];
-    const paramMatches = path.match(/:([a-zA-Z_][a-zA-Z0-9_]*)/g);
-    if (paramMatches) {
-      for (const param of paramMatches) {
-        const paramName = param.substring(1); // Remove o ':'
+    const dynamicParamNames = getDynamicPathParams(path);
+    for (const paramName of dynamicParamNames) {
         pathParams.push({
           name: paramName,
           in: 'path',
@@ -101,7 +127,6 @@ function generateSwaggerDocumentation(endpointsInfo: Record<string, EndpointInfo
             example: paramName.toLowerCase().includes('id') ? 1 : `exemplo_${paramName}`
           }
         });
-      }
     }
 
     if (!paths[swaggerPath]) {
@@ -109,40 +134,42 @@ function generateSwaggerDocumentation(endpointsInfo: Record<string, EndpointInfo
     }
 
     for (const [method, config] of Object.entries(methods)) {
-      const { body, headers, cookies } = config;
+      const { body, headers, cookies, status } = config;
       const methodLower = method.toLowerCase();
+      const responseStatus = status ?? 200;
+
+      const successResponse: any = {
+        description: responseStatus === 200 ? 'Successful response' : `Resposta ${responseStatus}`,
+        ...(headers && Object.keys(headers).length > 0 && {
+          headers: Object.entries(headers).reduce((acc, [key, value]) => {
+            acc[key] = {
+              description: `Header customizado: ${key}`,
+              schema: {
+                type: 'string',
+                example: value
+              }
+            };
+            return acc;
+          }, {} as any)
+        }),
+        content: {
+          'application/json': {
+            schema: Array.isArray(body) ? {
+              type: 'array',
+              items: generateInlineSchema(body[0] || {}),
+              example: body
+            } : generateInlineSchema(body || {})
+          }
+        }
+      };
 
       // Configurar a documentação do endpoint
       const endpointDoc: any = {
         tags: [source], // Usar o nome da pasta/arquivo como tag
         summary: `${method} ${endpoint}`,
-        description: `Endpoint ${method} para ${endpoint}. Retorna dados mockados baseados no arquivo JSON.${headers ? '\n\n**Headers customizados configurados:** ' + Object.keys(headers).join(', ') : ''}${cookies ? '\n\n**Cookies mockados configurados:** ' + Object.keys(cookies).join(', ') : ''}`,
+        description: `Endpoint ${method} para ${endpoint}. Retorna dados mockados baseados no arquivo JSON.${status != null ? `\n\n**Status de resposta:** ${status}` : ''}${headers ? '\n\n**Headers customizados configurados:** ' + Object.keys(headers).join(', ') : ''}${cookies ? '\n\n**Cookies mockados configurados:** ' + Object.keys(cookies).join(', ') : ''}`,
         responses: {
-          200: {
-            description: 'Successful response',
-            // Adicionar headers customizados na documentação se existirem
-            ...(headers && Object.keys(headers).length > 0 && {
-              headers: Object.entries(headers).reduce((acc, [key, value]) => {
-                acc[key] = {
-                  description: `Header customizado: ${key}`,
-                  schema: {
-                    type: 'string',
-                    example: value
-                  }
-                };
-                return acc;
-              }, {} as any)
-            }),
-            content: {
-              'application/json': {
-                schema: Array.isArray(body) ? {
-                  type: 'array',
-                  items: generateInlineSchema(body[0] || {}),
-                  example: body
-                } : generateInlineSchema(body || {})
-              }
-            }
-          },
+          [responseStatus]: successResponse,
           404: {
             description: 'Endpoint não encontrado'
           },
@@ -200,7 +227,8 @@ Os dados retornados são baseados nos arquivos JSON configurados.
 
 ### Parâmetros Suportados
 
-- **Path Parameters**: \`:id\`, \`:userId\`, etc. são automaticamente detectados
+- **Path Parameters**: \`:id\`, \`:userId\`, etc. são automaticamente detectados. Use \`::param\` para rota literal (ex: \`users/::id\` corresponde à URL exata \`/users/:id\`)
+- **Status de resposta**: Configure \`status\` no JSON (ex: 200, 201, 404, 500) para definir o código HTTP retornado
 - **Request Body**: Para POST, PUT e PATCH requests
 
 Desenvolvido com ❤️ usando Json-To-Mock-Api v${packageJson.version}
@@ -370,15 +398,19 @@ export async function startServer(
 
   // Cria rotas dinamicamente baseadas no arquivo JSON
   for (const [endpoint, methods] of Object.entries(endpoints)) {
-    // Converte o endpoint para o formato do Express
-    const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    // Converte o endpoint para o formato do Express (::param vira literal :param)
+    const rawPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const path = toExpressPath(rawPath);
     
     // Configura os métodos HTTP para cada endpoint
-    for (const [method, config] of Object.entries(methods as Record<string, { body: any; headers?: Record<string, string>; cookies?: Record<string, string | { value: string; options?: any }> }>)) {
-      const { body, headers, cookies } = config;
+    for (const [method, config] of Object.entries(methods as Record<string, { body: any; status?: number; headers?: Record<string, string>; cookies?: Record<string, string | { value: string; options?: any }> }>)) {
+      const { body, headers, cookies, status } = config;
+      const statusCode = status ?? 200;
 
-      // Função auxiliar para aplicar headers, cookies e retornar resposta
+      // Função auxiliar para aplicar headers, cookies, status e retornar resposta
       const sendResponse = (res: express.Response) => {
+        res.status(statusCode);
+
         // Aplicar headers customizados se existirem
         if (headers) {
           Object.entries(headers).forEach(([key, value]) => {
@@ -399,7 +431,11 @@ export async function startServer(
           });
         }
         
-        res.json(body);
+        if (statusCode === 204) {
+          res.send();
+        } else {
+          res.json(body);
+        }
       };
 
       switch (method.toUpperCase()) {
@@ -459,11 +495,12 @@ export async function startServer(
       console.log(chalk.blue('\n📋 Endpoints disponíveis:'));
       
       Object.entries(endpoints).forEach(([endpoint, methods]) => {
-        const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+        const rawPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+        const displayPath = rawPath.replace(/::/g, ':'); // ::param → :param para exibição
         const availableMethods = Object.keys(methods as Record<string, any>);
         
         availableMethods.forEach(method => {
-          console.log(chalk.green(`  [${method}] http://${host}:${port}${path}`));
+          console.log(chalk.green(`  [${method}] http://${host}:${port}${displayPath}`));
         });
       });
 

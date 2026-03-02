@@ -34,6 +34,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'headers',
         'cookies',
+        'status-code-e-rotas-literais',
       ],
     },
     {

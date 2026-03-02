@@ -128,7 +128,7 @@ Para controle total, use a estrutura de endpoints:
 
 ## 🔗 Parâmetros de Path
 
-O Json-To-Mock-Api suporta parâmetros dinâmicos usando a sintaxe `:parametro`:
+O Json-To-Mock-Api suporta parâmetros dinâmicos usando a sintaxe `:parametro`. Para usar um segmento **literal** (ex.: a URL exata `/users/:id` sem ser dinâmico), use **`::param`** — veja [Status Code e Rotas Literais](./status-code-e-rotas-literais#rotas-literais-desativar-parâmetro-dinâmico).
 
 ```json
 {
@@ -153,6 +153,7 @@ O Json-To-Mock-Api suporta parâmetros dinâmicos usando a sintaxe `:parametro`:
 - `:userId` → `{userId}` (detectado como integer)
 - `:name` → `{name}` (detectado como string)
 - `:slug` → `{slug}` (detectado como string)
+- **Rotas literais:** use `::param` para que o segmento seja literal (ex.: `users/::id` casa com a URL `/users/:id`). Ver [documentação](./status-code-e-rotas-literais#rotas-literais-desativar-parâmetro-dinâmico).
 
 ## 🌐 Métodos HTTP Suportados
 
@@ -200,6 +201,10 @@ A documentação é gerada automaticamente com base em:
 - **Descrições**: Geradas automaticamente para cada endpoint
 - **Exemplos**: Baseados nos dados reais dos arquivos JSON
 - **Schemas**: Inferidos automaticamente dos dados
+
+## 📊 Status Code de Resposta
+
+Você pode definir o código HTTP de resposta com o campo `status` em cada método (ex.: `201` para POST, `204` para DELETE). Sem `status`, o padrão é `200`. Ver [Status Code e Rotas Literais](./status-code-e-rotas-literais#status-code-de-resposta).
 
 ## 🔧 Headers Mockados
 
@@ -453,4 +458,4 @@ O servidor exibe informações úteis no console:
 
 ---
 
-**Próximo passo:** Explore exemplos específicos de [Headers Mockados](./headers) e [Cookies Mockados](./cookies)! 🚀 
+**Próximos passos:** Explore [Headers Mockados](./headers), [Cookies Mockados](./cookies) e [Status Code e Rotas Literais](./status-code-e-rotas-literais)! 🚀

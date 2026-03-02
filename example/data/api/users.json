@@ -27,6 +27,7 @@
         }
       },
       "POST": {
+        "status": 201,
         "body": {
           "id": 3,
           "name": "Novo Usuário",
@@ -73,7 +74,16 @@
         "body": { "id": 1, "name": "João Silva Atualizado", "email": "joao.novo@email.com", "age": 31, "city": "São Paulo" }
       },
       "DELETE": {
-        "body": { "message": "Usuário removido com sucesso" }
+        "status": 204,
+        "body": null
+      }
+    },
+    "users/::id": {
+      "GET": {
+        "status": 200,
+        "body": {
+          "message": "Rota literal: a URL exata é /users/:id (dois pontos + id), não um parâmetro dinâmico"
+        }
       }
     },
     "users/:id": {
