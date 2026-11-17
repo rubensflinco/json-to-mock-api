@@ -1,7 +1,7 @@
 {
   "name": "json-to-mock-api",
   "version": "1.1.1",
-  "description": "Uma biblioteca CLI para criar servidores REST a partir de arquivos JSON",
+  "description": "A CLI for creating mock REST APIs from JSON files or folders, with automatic Swagger documentation",
   "license": "MIT",
   "author": {
     "name": "Rubens Flinco",
@@ -16,17 +16,20 @@
   "files": [
     "dist/**/*",
     "README.md",
+    "README.pt-BR.md",
     "LICENSE",
     "package.json"
   ],
   "keywords": [
-    "json-server",
-    "rest-api",
-    "mock-server",
+    "api",
     "cli",
     "express",
-    "swagger",
-    "json"
+    "json",
+    "json-server",
+    "json-to-mock-api",
+    "mock-server",
+    "rest-api",
+    "swagger"
   ],
   "repository": {
     "type": "git",

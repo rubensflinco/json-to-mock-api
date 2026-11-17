@@ -235,7 +235,7 @@ Desenvolvido com ❤️ usando Json-To-Mock-Api v${packageJson.version}
       `,
       contact: {
         name: 'Json-To-Mock-Api',
-        url: 'https://jsont-to-mock-api.fdoma.in'
+        url: 'https://json-to-mock-api.fdoma.in'
       },
       license: {
         name: 'MIT',
@@ -377,7 +377,7 @@ export async function startServer(
   app.use('/', swaggerUi.serve);
   app.get('/', swaggerUi.setup(swaggerSpec, {
     customSiteTitle: 'Json-To-Mock-Api v' + packageJson.version + ' - Documentação API',
-    customfavIcon: 'https://jsont-to-mock-api.fdoma.in/favicon.ico',
+    customfavIcon: 'https://json-to-mock-api.fdoma.in/favicon.ico',
     customCss: `
       .swagger-ui .topbar { display: none; }
       .swagger-ui .info .title { color: #3b82f6; }
