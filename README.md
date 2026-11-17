@@ -1,5 +1,7 @@
 # Json-To-Mock-Api
 
+[English](README.md) | [Português (Brasil)](README.pt-BR.md)
+
 A simple CLI library to create REST servers from JSON files or folders with multiple JSON files, featuring **automatic integrated Swagger documentation**.
 
 [![NPM Version](https://img.shields.io/npm/v/json-to-mock-api.svg)](https://www.npmjs.com/package/json-to-mock-api)
@@ -96,7 +98,7 @@ json-to-mock-api -d ./data
 
 For detailed documentation, advanced features, examples, and guides, visit:
 
-**[Official Documentation →](https://jsont-to-mock-api.fdoma.in/)**
+**[Official Documentation →](https://json-to-mock-api.fdoma.in/)**
 
 The documentation includes:
 - Complete setup guides
@@ -113,4 +115,4 @@ MIT
 
 ---
 
-**[📖 Read the Full Documentation](https://jsont-to-mock-api.fdoma.in/)** | **[🐛 Report Issues](https://github.com/rubensflinco/json-to-mock-api/issues)** | **[💬 Discussions](https://github.com/rubensflinco/json-to-mock-api/discussions)** 
+**[📖 Read the Full Documentation](https://json-to-mock-api.fdoma.in/)** | **[🐛 Report Issues](https://github.com/rubensflinco/json-to-mock-api/issues)** | **[💬 Discussions](https://github.com/rubensflinco/json-to-mock-api/discussions)**
