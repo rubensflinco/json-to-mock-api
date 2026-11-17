@@ -1,6 +1,6 @@
 {
   "name": "json-to-mock-api",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A CLI for creating mock REST APIs from JSON files or folders, with automatic Swagger documentation",
   "license": "MIT",
   "author": {
